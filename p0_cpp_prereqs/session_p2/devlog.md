@@ -15,6 +15,14 @@ This is our baseline.
   - when k loop finishes, sum = one complete dot product = one element of C
 - Total: N rows × N cols × N dot product steps = N³ operations
 
+## CPU kernel analogy
+- matmul() = the kernel (does the actual computation)
+- main() = the host (allocates memory, calls the kernel, checks results, frees memory)
+- In CUDA the structure is identical, just keywords change:
+  - new → cudaMalloc
+  - matmul(A, B, C, N) → matmul<<<grid, block>>>(A, B, C, N)
+  - delete[] → cudaFree
+
 ## Timing with chrono
 - #include <chrono> — built-in C++ library for timing
 - auto start = std::chrono::high_resolution_clock::now()
