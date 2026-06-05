@@ -49,3 +49,8 @@ int i = blockIdx.x * blockDim.x + threadIdx.x
 - h_ prefix → host (CPU) memory
 - d_ prefix → device (GPU) memory
 - Standard convention in all CUDA code
+
+## Result
+- Ran on RTX 4090 on RunPod
+- C[0] = 3.0, C[1023] = 3.0 — 1024 parallel additions, all correct
+- First CUDA kernel working
