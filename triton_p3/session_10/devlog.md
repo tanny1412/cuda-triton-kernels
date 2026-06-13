@@ -67,6 +67,15 @@ Store acc to O
 
 Speedup grows because standard attention is O(N²) memory, FlashAttention is O(N).
 
+## Future optimization: skip future K/V tiles
+- Our kernel loops over ALL K/V tiles even if they're all future tokens (all -inf)
+- For pid=0 (tokens 0-63), only the first K/V tile has valid scores — remaining 7 tiles are wasted work
+- Optimization: if entire K tile is future (all offs_kv > max(offs_n)), skip loading it entirely
+- pid=0 would loop 1 time instead of 8, pid=1 loops 2 times, etc. — triangular structure
+- Within a tile, causal mask makes half the scores -inf but we still load V and compute — minimal saving
+- Real speedup comes from skipping tiles, not from masking within a tile
+- This is one of the key optimizations in FlashAttention-2
+
 ## This kernel vs production FlashAttention
 - Forward pass only (no backward)
 - Single head, no batch dimension
