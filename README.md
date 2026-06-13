@@ -19,6 +19,8 @@ Implemented FlashAttention forward pass in Triton — tiles Q/K/V in SRAM using 
 
 Speedup grows with sequence length because standard attention allocates an [N, N] score matrix in HBM (268MB at N=8192). FlashAttention stays O(N) in memory.
 
+![benchmark](triton_p3/session_10/benchmark.png)
+
 Files: `triton_p3/session_10/flash_attention.py`, `triton_p3/session_10/flash_attention_causal.py`
 
 ---
