@@ -51,6 +51,22 @@ Store acc to O
 - N=8192: flash=0.338ms, standard=1.872ms → 5.54x speedup
 - Speedup grows with N because standard attention's [N,N] matrix grows quadratically
 
+## Causal mask
+- Token i can only attend to token j if j <= i (autoregressive — GPT/LLaMA style)
+- Implemented as: causal_mask = offs_n[:, None] >= offs_kv[None, :]
+- scores = tl.where(causal_mask, scores, -inf) → future tokens get zero attention weight after softmax
+- [:, None] makes a column vector, [None, :] makes a row vector → broadcasting gives [BLOCK_N, BLOCK_N] boolean mask
+
+## Causal benchmark results (new pod, different GPU)
+| N    | Flash (ms) | Standard (ms) | Speedup |
+|------|-----------|---------------|---------|
+| 512  | 0.027     | 0.034         | 1.25x   |
+| 1024 | 0.043     | 0.057         | 1.32x   |
+| 2048 | 0.082     | 0.179         | 2.19x   |
+| 4096 | 0.159     | 1.006         | 6.34x   |
+
+Speedup grows because standard attention is O(N²) memory, FlashAttention is O(N).
+
 ## This kernel vs production FlashAttention
 - Forward pass only (no backward)
 - Single head, no batch dimension
