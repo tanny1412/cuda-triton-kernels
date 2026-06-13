@@ -102,3 +102,21 @@ expected = torch.softmax(scores, dim=1) @ V
 
 print(f"max error vs standard attention: {(O - expected).abs().max().item():.6f}")
 print(f"O[0][0] = {O[0][0].item():.4f}  expected = {expected[0][0].item():.4f}")
+
+# benchmark
+def standard_attention(Q, K, V, D):
+    scores = (Q @ K.T) / (D ** 0.5)
+    return torch.softmax(scores, dim=1) @ V
+
+N, D = 2048, 64
+Q = torch.randn(N, D, device='cuda')
+K = torch.randn(N, D, device='cuda')
+V = torch.randn(N, D, device='cuda')
+
+t_flash = triton.testing.do_bench(lambda: flash_attention(Q, K, V))
+t_std   = triton.testing.do_bench(lambda: standard_attention(Q, K, V, D))
+
+print(f"\nN={N}, D={D}")
+print(f"flash attention:    {t_flash:.3f} ms")
+print(f"standard attention: {t_std:.3f} ms")
+print(f"speedup: {t_std / t_flash:.2f}x")
