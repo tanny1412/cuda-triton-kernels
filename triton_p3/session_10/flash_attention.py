@@ -108,7 +108,7 @@ def standard_attention(Q, K, V, D):
     scores = (Q @ K.T) / (D ** 0.5)
     return torch.softmax(scores, dim=1) @ V
 
-N, D = 2048, 64
+N, D = 8192, 64
 Q = torch.randn(N, D, device='cuda')
 K = torch.randn(N, D, device='cuda')
 V = torch.randn(N, D, device='cuda')
