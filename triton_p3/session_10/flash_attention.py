@@ -88,6 +88,11 @@ def flash_attention(Q, K, V):
     )
     return O
 
+def standard_attention(Q, K, V, D):
+    scores = (Q @ K.T) / (D ** 0.5)
+    return torch.softmax(scores, dim=1) @ V
+
+
 # test
 N, D = 512, 64   # sequence length 512, head dim 64
 Q = torch.randn(N, D, device='cuda')
@@ -95,18 +100,12 @@ K = torch.randn(N, D, device='cuda')
 V = torch.randn(N, D, device='cuda')
 
 O = flash_attention(Q, K, V)
-
-# reference: standard attention
-scores = (Q @ K.T) / (D ** 0.5)
-expected = torch.softmax(scores, dim=1) @ V
+expected = standard_attention(Q, K, V, D)
 
 print(f"max error vs standard attention: {(O - expected).abs().max().item():.6f}")
 print(f"O[0][0] = {O[0][0].item():.4f}  expected = {expected[0][0].item():.4f}")
 
 # benchmark
-def standard_attention(Q, K, V, D):
-    scores = (Q @ K.T) / (D ** 0.5)
-    return torch.softmax(scores, dim=1) @ V
 
 N, D = 8192, 64
 Q = torch.randn(N, D, device='cuda')
